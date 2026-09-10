@@ -1,33 +1,33 @@
 # Open TTS Reader
 
-**Open-source browser TTS reader and reference implementation for Web Speech API and `SpeechSynthesis`.**
+**Опенсорсный браузерный TTS-ридер и референсная реализация Web Speech API и `SpeechSynthesis`.**
 
-Open TTS Reader is a static web application whose primary purpose is to demonstrate, in a working application, how browser text-to-speech is built around `SpeechSynthesis`, `SpeechSynthesisUtterance`, and `SpeechSynthesisVoice`.
+Open TTS Reader — это статическое веб-приложение, основная цель которого — продемонстрировать на примере работающего приложения, как устроен браузерный синтез речи на основе `SpeechSynthesis`, `SpeechSynthesisUtterance` и `SpeechSynthesisVoice`.
 
-The project is intentionally small, dependency-free, and serverless. It can be opened locally or deployed as a static site.
+Проект намеренно небольшой, не имеет зависимостей и не требует сервера. Его можно открыть локально или развернуть как статический сайт.
 
-## What this repository documents
+## Что документирует этот репозиторий
 
-The repository is designed as both a usable reader and a technical reference for browser speech synthesis. The documentation covers:
+Репозиторий задуман одновременно как рабочий ридер и как техническая справка по браузерному синтезу речи. Документация охватывает:
 
-- the role of `SpeechSynthesis` in the Web Speech API;
-- `Window.speechSynthesis` as the application entry point;
-- `SpeechSynthesisUtterance` as a speech request;
-- `SpeechSynthesisVoice` and voice metadata;
-- `getVoices()` and the asynchronous `voiceschanged` lifecycle;
-- `lang` versus an explicitly selected `voice`;
-- the utterance queue and `speak()`, `pause()`, `resume()`, `cancel()`;
-- `speaking`, `paused`, and `pending` controller state;
-- utterance events such as `start`, `end`, `pause`, `resume`, `boundary`, `mark`, and `error`;
-- character positions and the practical limits of `boundary`-based synchronization;
-- chunking long documents into manageable utterances;
-- local and remote speech services exposed through browser voices;
-- browser/platform variability;
-- the distinction between a browser TTS API and a dedicated neural TTS service.
+- роль `SpeechSynthesis` в Web Speech API;
+- `Window.speechSynthesis` как точку входа приложения;
+- `SpeechSynthesisUtterance` как запрос на произнесение речи;
+- `SpeechSynthesisVoice` и метаданные голосов;
+- `getVoices()` и асинхронный жизненный цикл `voiceschanged`;
+- различие между `lang` и явно выбранным `voice`;
+- очередь высказываний (utterance queue) и методы `speak()`, `pause()`, `resume()`, `cancel()`;
+- состояния контроллера `speaking`, `paused` и `pending`;
+- события высказывания, такие как `start`, `end`, `pause`, `resume`, `boundary`, `mark` и `error`;
+- позиции символов и практические ограничения синхронизации на основе `boundary`;
+- разбиение длинных документов на управляемые высказывания;
+- локальные и удалённые речевые сервисы, предоставляемые через браузерные голоса;
+- вариативность между браузерами и платформами;
+- различие между браузерным TTS API и выделенным нейросетевым TTS-сервисом.
 
-Start with **[Browser Speech Synthesis: Web Speech API and SpeechSynthesis](docs/speech-synthesis.html)**.
+Начните с **[Browser Speech Synthesis: Web Speech API and SpeechSynthesis](docs/speech-synthesis.html)**.
 
-## The technology in one diagram
+## Технология в виде одной схемы
 
 ```text
 Web application
@@ -49,34 +49,34 @@ SpeechSynthesis controller
                              audio output
 ```
 
-`SpeechSynthesis` is an application-facing controller. It does not define one universal voice model or one universal voice inventory. The actual speech service and available voices are platform-dependent.
+`SpeechSynthesis` — это контроллер, обращённый к приложению. Он не задаёт единую универсальную модель голоса или единый универсальный набор голосов. Фактический речевой сервис и доступные голоса зависят от платформы.
 
-## Reference implementation
+## Референсная реализация
 
-The demo implements the concepts described in the documentation:
+Демо реализует концепции, описанные в документации:
 
-- paste text or open `.txt`, `.md`, and `.html` files;
-- select an available voice and language;
-- adjust rate, pitch, and volume;
-- play, pause, resume, and stop;
-- split long text into sequential utterances;
-- show reading progress;
-- keep the interface usable on mobile screens;
-- run as a static site without a backend or API key.
+- вставка текста или открытие файлов `.txt`, `.md` и `.html`;
+- выбор доступного голоса и языка;
+- настройка скорости, высоты тона и громкости;
+- воспроизведение, пауза, возобновление и остановка;
+- разбиение длинного текста на последовательные высказывания;
+- отображение прогресса чтения;
+- сохранение удобства интерфейса на мобильных экранах;
+- работа как статический сайт без бэкенда и API-ключа.
 
-## Privacy model
+## Модель конфиденциальности
 
-The application itself does not send the entered document to an Open TTS Reader server: there is no application backend. However, `SpeechSynthesisVoice.localService` and `voiceURI` expose information about the speech service associated with a voice. Depending on the platform and selected voice, synthesis may involve a local or remote service. Users should therefore not interpret “no project backend” as a universal guarantee that every platform processes speech locally.
+Само приложение не отправляет введённый документ на сервер Open TTS Reader: серверной части у проекта нет. Однако `SpeechSynthesisVoice.localService` и `voiceURI` раскрывают информацию о речевом сервисе, связанном с голосом. В зависимости от платформы и выбранного голоса синтез может выполняться локальным или удалённым сервисом. Поэтому отсутствие серверной части у проекта не следует воспринимать как универсальную гарантию того, что на любой платформе речь обрабатывается локально.
 
-## Browser TTS and neural TTS
+## Браузерный TTS и нейросетевой TTS
 
-Browser TTS and neural TTS are related but different layers. `SpeechSynthesis` provides the browser-facing control model; a dedicated neural TTS service can instead provide its own voice models, audio generation, voice cloning, or server/API workflow.
+Браузерный TTS и нейросетевой TTS — связанные, но разные уровни. `SpeechSynthesis` предоставляет модель управления, обращённую к браузеру; выделенный нейросетевой TTS-сервис может вместо этого предлагать собственные модели голосов, генерацию аудио, клонирование голоса или серверный/API-воркфлоу.
 
-For specialized AI voice generation, natural neural voices, or voice cloning, a dedicated AI voice service such as [ERA2 Voice](https://voice.era2.ai/) can be used instead of relying on the voices exposed by the browser.
+Для специализированной генерации ИИ-голосов, натуральных нейросетевых голосов или клонирования голоса вместо голосов, предоставляемых браузером, можно использовать выделенный сервис ИИ-голосов, например [ERA2 Voice](https://voice.era2.ai/).
 
-## Documentation
+## Документация
 
-- [Browser Speech Synthesis](docs/speech-synthesis.html) — main technical guide.
+- [Browser Speech Synthesis](docs/speech-synthesis.html) — основное техническое руководство.
 - [Web Speech API scope and architecture](docs/web-speech-api.md)
 - [Voice discovery and selection](docs/voices.md)
 - [Long-text TTS and utterance chunking](docs/long-text.md)
@@ -84,6 +84,6 @@ For specialized AI voice generation, natural neural voices, or voice cloning, a 
 - [Application integration](docs/integration.md)
 - [Accessibility](docs/accessibility.md)
 
-## License
+## Лицензия
 
 GPL-2.0-or-later.
