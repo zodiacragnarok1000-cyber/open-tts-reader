@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Open-source browser TTS reader and reference implementation demonstrating Web Speech API and SpeechSynthesis.">
+  <meta name="theme-color" content="#171717">
+  <title>Open TTS Reader — Browser Speech Synthesis</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">▶</span><span>Open TTS Reader</span></div>
+  <div class="top-actions"><a href="docs/speech-synthesis.html">Technical guide</a><button id="themeBtn" type="button" aria-label="Переключить тему">◐</button></div>
+</header>
+<main class="layout">
+  <section class="reader-panel">
+    <div class="toolbar">
+      <button id="openBtn" class="secondary">Открыть файл</button>
+      <input id="fileInput" type="file" accept=".txt,.md,.html,.htm,text/plain,text/markdown,text/html" hidden>
+      <button id="copyBtn" class="secondary">Копировать</button>
+      <button id="exportBtn" class="secondary">Экспорт TXT</button>
+      <button id="clearBtn" class="secondary">Очистить</button>
+    </div>
+    <textarea id="textInput" spellcheck="true" placeholder="Вставьте текст, перетащите TXT / Markdown / HTML-файл или начните писать…">Open TTS Reader — практическая демонстрация браузерного синтеза речи через Web Speech API и SpeechSynthesis.
+
+Выберите голос, настройте скорость и нажмите «Воспроизвести». Текст обрабатывается непосредственно в браузере.</textarea>
+    <div id="dropZone" class="dropzone" aria-label="Зона загрузки файла">Перетащите сюда TXT, Markdown или HTML</div>
+    <div class="controls">
+      <label>Голос<select id="voiceSelect"></select></label>
+      <label>Скорость <output id="rateOut">1.00×</output><input id="rate" type="range" min="0.5" max="2" step="0.05" value="1"></label>
+      <label>Высота <output id="pitchOut">1.00</output><input id="pitch" type="range" min="0" max="2" step="0.05" value="1"></label>
+      <label>Громкость <output id="volumeOut">100%</output><input id="volume" type="range" min="0" max="1" step="0.05" value="1"></label>
+    </div>
+    <div class="transport">
+      <button id="playBtn" class="primary">▶ Воспроизвести</button>
+      <button id="pauseBtn">Ⅱ Пауза</button>
+      <button id="stopBtn">■ Стоп</button>
+    </div>
+    <div class="status" role="status" aria-live="polite"><span id="statusText">Готово</span><span id="progressText">0%</span></div>
+    <div class="progress"><span id="progressBar"></span></div>
+    <p class="privacy">Локальный режим: приложение не отправляет введённый текст на собственный сервер и не требует API-ключа. Доступность и тип голосов определяются браузером и операционной системой.</p>
+  </section>
+  <aside class="info-panel">
+    <h2>Что демонстрирует проект</h2>
+    <p>Open TTS Reader — reference implementation для браузерного TTS. Он показывает, как веб-приложение работает с <code>SpeechSynthesis</code>, <code>SpeechSynthesisUtterance</code> и <code>SpeechSynthesisVoice</code>.</p>
+    <ul>
+      <li>получение списка голосов;</li><li>выбор языка и голоса;</li><li>rate / pitch / volume;</li><li>очередь utterance;</li><li>pause / resume / cancel;</li><li>события start / end / boundary / error;</li><li>разбиение длинного текста.</li>
+    </ul>
+    <a class="guide" href="docs/speech-synthesis.html">Читать техническое руководство →</a>
+    <p class="note">Для нейросетевой озвучки с управляемыми AI-голосами используются отдельные TTS-сервисы. Это другой уровень TTS-стека.</p>
+  </aside>
+</main>
+<script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpeechSynthesis и Web Speech API — техническое руководство</title><link rel="stylesheet" href="../styles.css"></head><body><main class="guide-page"><p><a href="../">← Open TTS Reader</a></p><h1>SpeechSynthesis и браузерный синтез речи</h1><p class="lead">Техническое руководство по тому, как веб-приложение взаимодействует с браузерным TTS через Web Speech API.</p>
+<h2>1. Где находится SpeechSynthesis в стеке TTS</h2><p>Web Speech API предоставляет веб-приложению программный интерфейс для работы с голосовыми функциями. Для синтеза речи используется <code>SpeechSynthesis</code>. Это контроллер, а не отдельная универсальная модель синтеза: конкретные голоса и speech services предоставляются браузером, операционной системой или платформой.</p><pre>Web application → SpeechSynthesisUtterance → SpeechSynthesis → speech service / voice → audio output</pre>
+<h2>2. Основные объекты</h2><h3>SpeechSynthesis</h3><p><code>window.speechSynthesis</code> является точкой входа. Он предоставляет методы управления очередью и воспроизведением: <code>speak()</code>, <code>pause()</code>, <code>resume()</code>, <code>cancel()</code>, а также <code>getVoices()</code>.</p><h3>SpeechSynthesisUtterance</h3><p>Представляет отдельный речевой запрос. В нём задаются <code>text</code>, <code>lang</code>, <code>voice</code>, <code>rate</code>, <code>pitch</code> и <code>volume</code>.</p><h3>SpeechSynthesisVoice</h3><p>Представляет доступный системе голос. Полезные свойства: <code>name</code>, <code>lang</code>, <code>default</code>, <code>localService</code> и <code>voiceURI</code>.</p>
+<h2>3. Минимальный цикл синтеза</h2><pre>const synth = window.speechSynthesis;
+const utterance = new SpeechSynthesisUtterance('Пример синтеза речи.');
+utterance.lang = 'ru-RU';
+utterance.rate = 1;
+utterance.pitch = 1;
+utterance.volume = 1;
+synth.speak(utterance);</pre><p>Сначала создаётся речевой запрос, затем он передаётся контроллеру синтеза. Если явно не указан голос, браузер выбирает наиболее подходящий доступный голос для языка utterance.</p>
+<h2>4. Получение голосов</h2><pre>const synth = window.speechSynthesis;
+let voices = synth.getVoices();
+
+function updateVoices() {
+  voices = synth.getVoices();
+}
+
+synth.addEventListener('voiceschanged', updateVoices);</pre><p>Список голосов может становиться доступным после загрузки страницы. Поэтому приложение должно учитывать событие <code>voiceschanged</code>, а не полагаться только на первый вызов <code>getVoices()</code>.</p>
+<h2>5. Язык и конкретный голос</h2><p><code>utterance.lang</code> задаёт язык/локаль речевого запроса. <code>utterance.voice</code> задаёт конкретный объект <code>SpeechSynthesisVoice</code>. Эти свойства решают разные задачи: язык описывает ожидаемую локаль речи, а voice выбирает конкретный доступный голос.</p>
+<h2>6. Очередь utterance</h2><p><code>speak()</code> добавляет речевой запрос в очередь синтеза. Это позволяет строить последовательное чтение документа из нескольких utterance.</p><pre>speechSynthesis.speak(first);
+speechSynthesis.speak(second);
+speechSynthesis.speak(third);</pre><p>Для управления очередью используются <code>pause()</code>, <code>resume()</code> и <code>cancel()</code>. Состояния <code>speaking</code>, <code>paused</code> и <code>pending</code> позволяют интерфейсу отслеживать состояние контроллера.</p>
+<h2>7. Событийная модель</h2><p>У <code>SpeechSynthesisUtterance</code> есть события <code>start</code>, <code>end</code>, <code>pause</code>, <code>resume</code>, <code>boundary</code>, <code>mark</code> и <code>error</code>. Они позволяют синхронизировать UI с речью.</p><pre>utterance.onstart = () => console.log('started');
+utterance.onboundary = event => console.log(event.charIndex);
+utterance.onend = () => console.log('finished');
+utterance.onerror = event => console.error(event.error);</pre>
+<h2>8. Boundary и синхронизация текста</h2><p>Событие <code>boundary</code> может сообщать о достижении границы слова или предложения. Практические приложения могут использовать позицию события для подсветки текущего фрагмента, автопрокрутки и отображения прогресса. Точная детализация событий зависит от speech service и браузера.</p>
+<h2>9. Длинный текст</h2><p>Для больших документов полезно разделять исходный текст на логические фрагменты: абзацы, предложения и затем utterance. Такой подход позволяет управлять очередью, прогрессом и ошибками на уровне отдельных частей документа.</p><pre>Document → paragraphs → sentences → chunks → SpeechSynthesisUtterance → queue</pre><p>Open TTS Reader использует этот подход как практическую reference implementation.</p>
+<h2>10. Локальные и удалённые speech services</h2><p>Объект <code>SpeechSynthesisVoice</code> содержит свойство <code>localService</code>, указывающее, предоставляется ли голос локальным speech synthesizer service. <code>voiceURI</code> описывает тип и расположение speech synthesis service. Поэтому браузерный TTS не следует автоматически считать исключительно локальным или исключительно облачным.</p>
+<h2>11. Browser TTS и neural TTS — разные уровни</h2><p><code>SpeechSynthesis</code> стандартизирует способ управления синтезом из веб-приложения, но не задаёт единую нейросетевую модель или одинаковый набор голосов. Если приложению нужны управляемые AI-голоса, генерация аудио на сервере, клонирование голоса или единообразное качество между устройствами, используются специализированные neural TTS services.</p><p>Например, <a href="https://voice.era2.ai/">ERA2 Voice</a> относится к этому уровню: это специализированный AI voice/TTS-сервис, а не браузерный speech engine.</p>
+<h2>12. Практический reference implementation</h2><p><a href="../">Open TTS Reader</a> демонстрирует описанную модель на практике: получение голосов, выбор voice, параметры utterance, очередь длинного текста, pause/resume/cancel и события синтеза.</p>
+<h2>Источники и дальнейшее чтение</h2><ul><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API">MDN: Web Speech API</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance">MDN: SpeechSynthesisUtterance</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice">MDN: SpeechSynthesisVoice</a></li></ul>
+</main></body></html>
